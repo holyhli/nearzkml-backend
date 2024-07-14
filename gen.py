@@ -52,7 +52,10 @@ async def generate_proof(input: Any, model_name: str) -> Any:
 
     # Validate input data structure
     if not validate_input_data(input['input_data'], reference_input['input_data']):
-        return {"error": "Invalid input data structure", "expected_structure": reference_input['input_data']}
+        return {
+            "error": "Invalid input data structure",
+            "expected_structure": reference_input['input_data']
+        }
 
     print("Generating settings...", input)
     res = ezkl.gen_settings(model_path, settings_path, py_run_args=py_run_args)
