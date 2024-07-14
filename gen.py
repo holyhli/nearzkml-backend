@@ -12,23 +12,36 @@ py_run_args.output_visibility = "public"
 py_run_args.param_visibility = "fixed"
 
 def validate_input_data(input_data: Any, reference_data: Any) -> bool:
+    print("Validating input data...")
+
     if isinstance(input_data, list) and isinstance(reference_data, list):
+        print("Both input_data and reference_data are lists.")
         if len(input_data) != len(reference_data):
+            print("Length mismatch between input_data and reference_data lists.")
             return False
         for i in range(len(input_data)):
+            print(f"Validating list element {i}...")
             if not validate_input_data(input_data[i], reference_data[i]):
+                print(f"Validation failed for list element {i}.")
                 return False
     elif isinstance(input_data, dict) and isinstance(reference_data, dict):
+        print("Both input_data and reference_data are dictionaries.")
         if input_data.keys() != reference_data.keys():
+            print("Key mismatch between input_data and reference_data dictionaries.")
             return False
         for key in input_data:
+            print(f"Validating dictionary key '{key}'...")
             if not validate_input_data(input_data[key], reference_data[key]):
+                print(f"Validation failed for dictionary key '{key}'.")
                 return False
     else:
-        return isinstance(input_data, type(reference_data))
+        result = isinstance(input_data, type(reference_data))
+        print(f"Comparing types: {type(input_data)} and {type(reference_data)} - Result: {result}")
+        return result
+
+    print("Validation successful.")
     return True
 
-# Function to generate proof
 async def generate_proof(input: Any, model_name: str) -> Any:
     model_dir = os.path.join(base_dir, model_name)
 
@@ -50,14 +63,18 @@ async def generate_proof(input: Any, model_name: str) -> Any:
     with open(input_file_path, 'r') as f:
         reference_input = json.load(f)
 
+    # Parse the input data
+    input_data = json.loads(input['input_data'])
+    input['input_data'] = input_data  # Update the input dictionary with the parsed data
+
     # Validate input data structure
-    if not validate_input_data(input['input_data'], reference_input['input_data']):
+    if not validate_input_data(input_data, reference_input['input_data']):
         return {
             "error": "Invalid input data structure",
             "expected_structure": reference_input['input_data']
         }
 
-    print("Generating settings...", input)
+    print("Generating settings...", input_data)
     res = ezkl.gen_settings(model_path, settings_path, py_run_args=py_run_args)
     assert res == True
     print("Settings generated.")
