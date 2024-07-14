@@ -133,4 +133,7 @@ async def generate_proof(input: Any, model_name: str) -> Any:
     print("Proof generated.")
     assert os.path.isfile(proof_path)
 
-    return res
+    with open(proof_path, 'r') as proof_file:
+        proof_data = json.load(proof_file)
+
+    return proof_data
